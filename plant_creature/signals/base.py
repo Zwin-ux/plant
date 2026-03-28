@@ -18,3 +18,7 @@ class SignalSample:
 class SignalProvider(Protocol):
     def read(self) -> SignalSample:
         """Return a single raw signal sample."""
+
+
+class SignalProviderUnavailable(RuntimeError):
+    """Raised when a requested signal provider cannot run in the current environment."""

@@ -1,13 +1,20 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import time
 from pathlib import Path
 
 from config import APP_CONFIG, AppConfig
 from plant_creature.logging import JsonlRecorder, NullRecorder
 from plant_creature.outputs import ConsoleRenderer
-from plant_creature.signals import SignalProcessor, SimulatedSignalProvider
+from plant_creature.signals import (
+    ADS1115SignalProvider,
+    SignalProcessor,
+    SignalProvider,
+    SignalProviderUnavailable,
+    SimulatedSignalProvider,
+)
 from plant_creature.state import CreatureStateEngine
 
 
@@ -25,6 +32,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Write JSONL tick logs to the given file.",
     )
+    parser.add_argument(
+        "--signal-source",
+        choices=("simulated", "ads1115"),
+        default="simulated",
+        help="Choose which signal provider to run.",
+    )
     return parser.parse_args()
 
 
@@ -36,14 +49,28 @@ def build_recorder(config: AppConfig, log_file: Path | None) -> JsonlRecorder | 
     return NullRecorder()
 
 
-def run(config: AppConfig, ticks: int | None = None, log_file: Path | None = None) -> None:
-    provider = SimulatedSignalProvider(config.signal)
+def build_signal_provider(config: AppConfig, signal_source: str) -> SignalProvider:
+    if signal_source == "ads1115":
+        return ADS1115SignalProvider(
+            signal_config=config.signal,
+            hardware_config=config.ads1115,
+        )
+    return SimulatedSignalProvider(config.signal)
+
+
+def run(
+    config: AppConfig,
+    ticks: int | None = None,
+    log_file: Path | None = None,
+    signal_source: str = "simulated",
+) -> None:
+    provider = build_signal_provider(config, signal_source)
     processor = SignalProcessor(config.signal)
     engine = CreatureStateEngine(config.thresholds)
-    renderer = ConsoleRenderer(bar_width=config.console_bar_width)
+    output = ConsoleRenderer(bar_width=config.console_bar_width)
     recorder = build_recorder(config, log_file)
 
-    print("Plant Creature Alpha | simulation mode")
+    print(f"Plant Creature Alpha | {signal_source} source")
     print("Press Ctrl+C to stop.")
 
     cycle_count = 0
@@ -56,7 +83,7 @@ def run(config: AppConfig, ticks: int | None = None, log_file: Path | None = Non
         snapshot = engine.evaluate(processed)
         recorder.record_tick(processed, snapshot)
 
-        print(renderer.render(processed, snapshot), flush=True)
+        output.emit(processed, snapshot)
 
         cycle_count += 1
         elapsed = time.monotonic() - loop_started
@@ -68,7 +95,15 @@ def main() -> int:
     args = parse_args()
 
     try:
-        run(APP_CONFIG, ticks=args.ticks, log_file=args.log_file)
+        run(
+            APP_CONFIG,
+            ticks=args.ticks,
+            log_file=args.log_file,
+            signal_source=args.signal_source,
+        )
+    except SignalProviderUnavailable as exc:
+        print(f"Signal source unavailable: {exc}", file=sys.stderr)
+        return 1
     except KeyboardInterrupt:
         print("\nStopping Plant Creature Alpha.")
 

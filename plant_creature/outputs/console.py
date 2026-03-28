@@ -36,3 +36,6 @@ class ConsoleRenderer:
         filled = max(0, min(self._bar_width, filled))
         empty = self._bar_width - filled
         return "[" + ("#" * filled) + ("-" * empty) + "]"
+
+    def emit(self, signal: ProcessedSignal, snapshot: CreatureSnapshot) -> None:
+        print(self.render(signal, snapshot), flush=True)

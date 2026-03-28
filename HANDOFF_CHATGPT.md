@@ -53,17 +53,20 @@ The current repo already supports:
 
 - simulation-first runtime
 - living-feeling fake signal generation
+- a generic ADS1115 provider boundary for future analog input
 - signal smoothing and normalization
 - creature states: `SLEEPY`, `CALM`, `ACTIVE`, `ALERT`, `STRESSED`
 - one-line console rendering per tick
 - opt-in JSONL logging
 - Git-first Pi deployment workflow
 - Windows helper scripts for sync, smoke, and status
+- OLED and LED ring placeholder modules for tomorrow's hardware bring-up
 
 Main entrypoint:
 
 - `python main.py --ticks 10`
 - `python main.py --ticks 10 --log-file logs/dev.jsonl`
+- `python main.py --ticks 1 --signal-source ads1115`
 
 Pi helper scripts:
 
@@ -88,6 +91,7 @@ Current reality:
 - only the Raspberry Pi 5 is available today
 - no plant-signal or ADC integration should be assumed yet
 - software must remain runnable without hardware attached
+- the repo now has ADS1115/OLED/LED scaffolds, but hardware behavior is still intentionally unwired
 
 ## What ChatGPT should help with next
 
@@ -120,7 +124,7 @@ The most useful next build step after hardware arrives is probably:
 
 1. add a real ADS1115-backed signal provider behind the existing signal contract
 2. keep the simulator available side-by-side
-3. add a minimal output hook for the OLED and LED ring
+3. replace the OLED and LED placeholders with the first real output hooks
 4. start logging both simulated and real runs in the same schema
 5. calibrate signal ranges before making strong creature-behavior claims
 

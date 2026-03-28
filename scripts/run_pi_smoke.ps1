@@ -3,6 +3,8 @@ param(
     [string]$RemotePath = "/home/pi/plant",
     [int]$Ticks = 10,
     [string]$LogFile = "",
+    [ValidateSet("simulated", "ads1115")]
+    [string]$SignalSource = "simulated",
     [switch]$SkipPull
 )
 
@@ -16,6 +18,8 @@ if ($LogFile) {
     $logArgument = "--log-file '$LogFile'"
 }
 
+$signalArgument = "--signal-source $SignalSource"
+
 $remoteScript = @"
 set -euo pipefail
 cd '$RemotePath'
@@ -27,7 +31,7 @@ fi
 
 $pullStep
 source .venv/bin/activate
-python main.py --ticks $Ticks $logArgument
+python main.py --ticks $Ticks $signalArgument $logArgument
 "@
 
 $remoteScript | ssh $Host "bash -s"

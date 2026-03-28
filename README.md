@@ -20,11 +20,13 @@ Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a digital 
 The current Phase 1 scaffold focuses on a runnable core:
 
 - a simulated signal source that feels alive instead of purely random
+- a hardware-aware provider boundary for future ADS1115 input
 - a processor that smooths and normalizes the signal
 - a creature state engine with `SLEEPY`, `CALM`, `ACTIVE`, `ALERT`, and `STRESSED`
 - expressive console output
 - opt-in JSONL logging
 - Pi deployment scripts for bootstrap, sync, and smoke tests
+- OLED and LED ring placeholder modules for tomorrow's bring-up pass
 
 ## Project structure
 
@@ -47,6 +49,7 @@ plant/
     signals/
       __init__.py
       base.py
+      ads1115.py
       simulated.py
       processor.py
     state/
@@ -55,7 +58,10 @@ plant/
       models.py
     outputs/
       __init__.py
+      base.py
       console.py
+      oled.py
+      led_ring.py
     logging/
       __init__.py
       recorder.py
@@ -80,6 +86,14 @@ Run with logging:
 python3 main.py --ticks 10 --log-file logs/dev.jsonl
 ```
 
+Probe the future ADS1115 path:
+
+```bash
+python3 main.py --ticks 1 --signal-source ads1115
+```
+
+If the optional hardware libraries or the ADC are not available yet, the command should fail gracefully with a clear message.
+
 ## Pi workflow
 
 GitHub is the default source of truth:
@@ -98,6 +112,7 @@ For fast local iteration from Windows:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\sync_to_pi.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\run_pi_smoke.ps1 -SkipPull
+powershell -ExecutionPolicy Bypass -File .\scripts\run_pi_smoke.ps1 -SignalSource ads1115
 powershell -ExecutionPolicy Bypass -File .\scripts\pi_status.ps1
 ```
 
