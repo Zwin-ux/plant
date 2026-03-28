@@ -98,4 +98,9 @@ For fast local iteration from Windows:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\sync_to_pi.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\run_pi_smoke.ps1 -SkipPull
+powershell -ExecutionPolicy Bypass -File .\scripts\pi_status.ps1
 ```
+
+## Advisor handoff
+
+Use `HANDOFF_CHATGPT.md` when you want ChatGPT to stay aligned with the actual machine state, the current repo status, and the hardware arriving next.
