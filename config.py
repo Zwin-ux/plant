@@ -15,11 +15,18 @@ class SignalConfig:
 
 
 @dataclass(frozen=True)
-class StateThresholds:
-    sleepy_max: float = 0.18
-    calm_max: float = 0.38
-    active_max: float = 0.62
-    alert_max: float = 0.82
+class FusionConfig:
+    drive_smoothing_alpha: float = 0.18
+    stability_window: float = 0.18
+    stable_streak_goal_ticks: int = 300
+    stable_threshold: float = 0.6
+    stress_peak_decay: float = 0.96
+
+
+@dataclass(frozen=True)
+class StateConfig:
+    min_dwell_ticks: int = 5
+    recovering_min_ticks: int = 3
 
 
 @dataclass(frozen=True)
@@ -55,7 +62,8 @@ class LedRingConfig:
 @dataclass(frozen=True)
 class AppConfig:
     signal: SignalConfig = field(default_factory=SignalConfig)
-    thresholds: StateThresholds = field(default_factory=StateThresholds)
+    fusion: FusionConfig = field(default_factory=FusionConfig)
+    state: StateConfig = field(default_factory=StateConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     ads1115: ADS1115Config = field(default_factory=ADS1115Config)
     oled: OLEDConfig = field(default_factory=OLEDConfig)

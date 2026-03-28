@@ -10,9 +10,11 @@ class CreatureState(str, Enum):
     ACTIVE = "ACTIVE"
     ALERT = "ALERT"
     STRESSED = "STRESSED"
+    RECOVERING = "RECOVERING"
 
 
 @dataclass(frozen=True)
 class CreatureSnapshot:
     state: CreatureState
-    intensity: float
+    previous_state: CreatureState | None
+    is_transition: bool = False

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from plant_creature.signals import ProcessedSignal
-from plant_creature.state import CreatureSnapshot
+from plant_creature.presentation import CreaturePresentation
 
 
 class CreatureOutput(Protocol):
-    def emit(self, signal: ProcessedSignal, snapshot: CreatureSnapshot) -> None:
-        """Render or express the current creature state."""
+    def emit(self, presentation: CreaturePresentation) -> None:
+        """Render or express the current creature presentation."""
 
 
 class OutputUnavailable(RuntimeError):

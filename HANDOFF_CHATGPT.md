@@ -5,12 +5,12 @@ Use this as the current truth snapshot for Plant Creature Alpha.
 ## Project role split
 
 - Codex is the implementation and deployment agent.
-- ChatGPT is the advisor/helper for product logic, creature behavior, hardware strategy, calibration thinking, and critique.
+- ChatGPT is the advisor/helper for product logic, creature behavior, calibration thinking, hardware strategy, and critique.
 - The repo and the Raspberry Pi state below are the ground truth. Advice should stay aligned with them.
 
 ## What this project is
 
-Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a digital creature that starts in simulation mode and later grows into a plant-linked biofeedback organism.
+Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a small digital organism that starts in simulation mode and later grows into a plant-linked biofeedback companion.
 
 This is not a generic IoT dashboard.
 This is not a throwaway sensor demo.
@@ -39,28 +39,33 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pi_status.ps1
 - Virtualenv: present
 - Pi repo HEAD matched the local repo HEAD at the time of the check
 
-### Device nodes seen at check
-
-- I2C nodes: `/dev/i2c-13`, `/dev/i2c-14`
-- SPI node: `/dev/spidev10.0`
-- GPIO chips: `/dev/gpiochip0`, `/dev/gpiochip10`, `/dev/gpiochip11`, `/dev/gpiochip12`, `/dev/gpiochip13`, `/dev/gpiochip4`
-
-This does not mean the project hardware is connected yet. It only means the Pi exposes those device nodes right now.
-
 ## Current software status
 
-The current repo already supports:
+The current repo now supports:
 
 - simulation-first runtime
 - living-feeling fake signal generation
-- a generic ADS1115 provider boundary for future analog input
+- generic ADS1115 provider boundary for future analog input
 - signal smoothing and normalization
-- creature states: `SLEEPY`, `CALM`, `ACTIVE`, `ALERT`, `STRESSED`
-- one-line console rendering per tick
+- a lightweight TRIBE-inspired fusion layer with hidden drives:
+  - hydration
+  - stability
+  - energy
+  - bond
+  - stress_load
+- creature states:
+  - `SLEEPY`
+  - `CALM`
+  - `ACTIVE`
+  - `ALERT`
+  - `STRESSED`
+  - `RECOVERING`
+- deterministic creature micro-language
+- presentation-first console rendering
 - opt-in JSONL logging
 - Git-first Pi deployment workflow
-- Windows helper scripts for sync, smoke, and status
-- OLED and LED ring placeholder modules for tomorrow's hardware bring-up
+- Windows helper scripts for sync, smoke, and live Pi status
+- OLED and LED ring scaffolds that consume the same presentation model as the console path
 
 Main entrypoint:
 
@@ -68,12 +73,11 @@ Main entrypoint:
 - `python main.py --ticks 10 --log-file logs/dev.jsonl`
 - `python main.py --ticks 1 --signal-source ads1115`
 
-Pi helper scripts:
+## Very important scope note
 
-- `scripts/bootstrap_pi.sh`
-- `scripts/run_pi_smoke.ps1`
-- `scripts/sync_to_pi.ps1`
-- `scripts/pi_status.ps1`
+Actual [TRIBE v2](https://github.com/facebookresearch/tribev2) code is **not** integrated into this repo.
+
+The project only borrows the idea of hidden multimodal fusion and translates it into a Pi-sized creature model. That keeps the runtime small, maintainable, and realistic for the Raspberry Pi 5.
 
 ## Hardware arriving tomorrow
 
@@ -89,20 +93,20 @@ Confirmed incoming parts:
 Current reality:
 
 - only the Raspberry Pi 5 is available today
-- no plant-signal or ADC integration should be assumed yet
+- no live ADC or sensor integration should be assumed yet
 - software must remain runnable without hardware attached
-- the repo now has ADS1115/OLED/LED scaffolds, but hardware behavior is still intentionally unwired
+- the repo contains ADS1115, OLED, and LED boundaries, but the real device behavior is still intentionally unwired
 
 ## What ChatGPT should help with next
 
 Best advisory areas:
 
-- creature behavior design
-- state semantics and emotional logic
-- how to map noisy real inputs into creature-readable states
-- calibration strategy for ADS1115 + sensors
-- OLED and LED expression vocabulary
-- data logging schema and replay ideas
+- hidden-drive tuning
+- creature mood semantics
+- calibration strategy for ADS1115 + moisture sensing
+- OLED face language and screen composition
+- LED aura vocabulary
+- how to stage care loops and progression without exposing raw sensor jargon
 - ordering the first hardware-integration milestones
 
 ## Guardrails
@@ -117,16 +121,17 @@ Please keep advice aligned with these constraints:
 - no database unless clearly justified
 - no fake scientific claims
 - no pretending hardware is already wired or verified
+- no surprise heavyweight model stack on the Pi
 
 ## Good next implementation direction
 
-The most useful next build step after hardware arrives is probably:
+The most useful next build step after hardware arrives is:
 
-1. add a real ADS1115-backed signal provider behind the existing signal contract
-2. keep the simulator available side-by-side
-3. replace the OLED and LED placeholders with the first real output hooks
-4. start logging both simulated and real runs in the same schema
-5. calibrate signal ranges before making strong creature-behavior claims
+1. enable Pi I2C and verify device addresses
+2. wire the ADS1115 through the existing signal contract
+3. bring up one real OLED proof screen using the shared presentation model
+4. validate one LED aura behavior from the same presentation object
+5. calibrate moisture-derived hydration before making stronger creature claims
 
 ## Prompt to give ChatGPT
 
@@ -136,11 +141,11 @@ You are advising on Plant Creature Alpha, a Raspberry Pi 5 plant-creature system
 Current reality:
 - canonical repo: https://github.com/Zwin-ux/plant.git
 - the software already runs in simulation mode
+- the runtime uses a lightweight TRIBE-inspired hidden-drive layer, not the real TRIBE v2 model
 - Raspberry Pi hostname: plantpi
 - Pi IP: 192.168.137.142
 - Pi repo path: /home/pi/plant
 - Python 3.13.5 is working
-- the Pi checkout has already been deployed and smoke-tested successfully
 - hardware is not fully connected yet
 - incoming hardware tomorrow: ADS1115, SSD1306 OLED, WS2812 ring, capacitive moisture sensors, breadboards, jumper wires
 
@@ -159,6 +164,7 @@ Important constraints:
 - do not suggest giant frameworks
 - avoid fake scientific claims
 - preserve the existing modular architecture
+- do not propose importing actual TRIBE v2 into the Pi runtime
 
-Base your advice on the real machine state and the repo reality above, not on imagined infrastructure.
+Base your advice on the repo reality above, not on imagined infrastructure.
 ```

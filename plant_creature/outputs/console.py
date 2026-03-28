@@ -1,41 +1,46 @@
 from __future__ import annotations
 
-from plant_creature.signals import ProcessedSignal
-from plant_creature.state import CreatureSnapshot, CreatureState
+from plant_creature.presentation import CreaturePresentation
 
 
 class ConsoleRenderer:
-    _MOODS = {
-        CreatureState.SLEEPY: "(-.-)",
-        CreatureState.CALM: "(o_o)",
-        CreatureState.ACTIVE: "(^_^)",
-        CreatureState.ALERT: "(O_O)",
-        CreatureState.STRESSED: "(>_<)",
+    _FACES = {
+        "sleepy": "(-_-)",
+        "calm": "(o_o)",
+        "calm_warm": "(u_u)",
+        "active": "(^_^)",
+        "active_warm": "(^.^)",
+        "alert": "(O_O)",
+        "stressed": "(>_<)",
+        "recovering": "(._.)",
+        "recovering_warm": "(*_*)",
     }
 
-    def __init__(self, bar_width: int = 24) -> None:
+    def __init__(self, bar_width: int = 24, bar_steps: int = 8) -> None:
         self._bar_width = bar_width
+        self._bar_steps = bar_steps
 
-    def render(self, signal: ProcessedSignal, snapshot: CreatureSnapshot) -> str:
-        timestamp = signal.timestamp.astimezone().strftime("%H:%M:%S")
-        mood = self._MOODS[snapshot.state]
-        meter = self._meter(snapshot.intensity)
+    def render(self, presentation: CreaturePresentation) -> str:
+        flash = "!" if presentation.transition_flash else " "
+        face = self._FACES.get(presentation.face_id, "(o_o)")
+        meter = self._meter(presentation.signal_bar)
 
         return (
-            f"[{timestamp}] "
-            f"{snapshot.state.value:<8} "
-            f"{mood} "
-            f"raw={signal.raw_value:5.1f} "
-            f"smooth={signal.smoothed_value:5.1f} "
-            f"signal={meter} "
-            f"{snapshot.intensity * 100:5.1f}%"
+            f"{flash} "
+            f"{presentation.status_word:<7} "
+            f"{face} "
+            f"{presentation.utterance:<16} "
+            f"{meter} "
+            f"trend={presentation.trend:<7} "
+            f"aura={presentation.aura_pattern.value:<12} "
+            f"src={presentation.source_label}"
         )
 
-    def _meter(self, intensity: float) -> str:
-        filled = round(intensity * self._bar_width)
+    def _meter(self, signal_bar: int) -> str:
+        filled = round((signal_bar / self._bar_steps) * self._bar_width)
         filled = max(0, min(self._bar_width, filled))
         empty = self._bar_width - filled
         return "[" + ("#" * filled) + ("-" * empty) + "]"
 
-    def emit(self, signal: ProcessedSignal, snapshot: CreatureSnapshot) -> None:
-        print(self.render(signal, snapshot), flush=True)
+    def emit(self, presentation: CreaturePresentation) -> None:
+        print(self.render(presentation), flush=True)

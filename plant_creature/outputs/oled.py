@@ -3,16 +3,18 @@ from __future__ import annotations
 from typing import Any
 
 from config import OLEDConfig
+from plant_creature.presentation import CreaturePresentation
 
 from .base import OutputUnavailable
+from .oled_layouts import build_proof_frame
 
 
 class SSD1306Output:
     """
-    Placeholder SSD1306 output surface for the first hardware bring-up pass.
+    Placeholder SSD1306 output surface for the first creature expression pass.
 
-    This module intentionally stops short of creature rendering behavior so the
-    repo can prepare the boundary without pretending the display logic is done.
+    The module now consumes the same presentation object as the console path, but
+    it still stops short of live hardware drawing until the display is connected.
     """
 
     def __init__(self, config: OLEDConfig) -> None:
@@ -30,7 +32,7 @@ class SSD1306Output:
 
         return (
             True,
-            "SSD1306 libraries are available. Rendering behavior is still a placeholder.",
+            "SSD1306 libraries are available. Creature rendering is still a hardware-gated scaffold.",
         )
 
     @staticmethod
@@ -48,9 +50,12 @@ class SSD1306Output:
 
         return board, busio, adafruit_ssd1306
 
-    def emit(self, signal: object, snapshot: object) -> None:
-        del signal
-        del snapshot
+    def emit(self, presentation: CreaturePresentation) -> None:
+        del presentation
         raise OutputUnavailable(
-            "SSD1306 output is not wired into behavior yet. This module is a bring-up scaffold."
+            "SSD1306 output is not wired into live drawing yet. "
+            "Use build_proof_frame() and the shared presentation model during hardware bring-up."
         )
+
+    def preview_frame(self, presentation: CreaturePresentation) -> dict[str, object]:
+        return build_proof_frame(presentation)

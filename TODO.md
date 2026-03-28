@@ -2,22 +2,23 @@
 
 ## Next up
 
-- track explicit state transitions instead of only current state
-- move thresholds and timings toward richer config tuning
-- wire the ADS1115 provider against real hardware and capture first clean analog readings
-- decide how the capacitive moisture sensor should be interpreted once calibration data exists
-- wire the first OLED and LED output hooks once the SSD1306 and WS2812 ring arrive
+- enable Pi I2C and verify the OLED plus ADS1115 addresses on the live bus
+- wire the first real ADS1115 channel into the existing signal pipeline
+- decide how the capacitive moisture sensor should map into hydration after calibration data exists
+- replace the OLED placeholder with one proof screen built from the shared presentation model
+- replace the LED placeholder with one real aura pattern driven by the shared presentation model
 
 ## Soon after
 
-- persist signal and state events to JSONL or CSV with replay-friendly structure
-- compare simulated and real ADC streams through the same processing pipeline
-- replace output placeholders with actual OLED and LED creature expressions
-- add lightweight tests for the processor and state engine
-- add a lightweight status command for checking Pi environment health
+- add real care/check-in inputs before unlocking states like `PLEASED` or `LONELY`
+- persist longer-lived memory once care events and progression are real
+- add replay-friendly creature logs for comparing simulated and real runs
+- tune the hidden-drive formulas using real sensor behavior instead of only simulated input
+- add lightweight tests for fusion, session memory, and state dwell behavior
 
 ## Later
 
-- integrate the capacitive moisture sensor as a separate signal path from future biofeedback experiments
-- tune creature behavior so it feels emotionally coherent over longer sessions
-- layer in more expressive output behavior once physical signals feel trustworthy
+- add richer OLED face sets and stronger LED expression vocabulary
+- add progression, forms, and unlockable phrase sets
+- explore future plant-electrode input as a separate signal path from moisture sensing
+- revisit a local voice or LLM flavor layer only after sensing and outputs feel solid

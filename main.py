@@ -6,8 +6,11 @@ import time
 from pathlib import Path
 
 from config import APP_CONFIG, AppConfig
+from plant_creature.fusion import DriveInterpreter
 from plant_creature.logging import JsonlRecorder, NullRecorder
-from plant_creature.outputs import ConsoleRenderer
+from plant_creature.memory import SessionTracker
+from plant_creature.outputs import ConsoleRenderer, UtteranceGenerator
+from plant_creature.presentation import PresentationComposer
 from plant_creature.signals import (
     ADS1115SignalProvider,
     SignalProcessor,
@@ -30,7 +33,7 @@ def parse_args() -> argparse.Namespace:
         "--log-file",
         type=Path,
         default=None,
-        help="Write JSONL tick logs to the given file.",
+        help="Write JSONL creature logs to the given file.",
     )
     parser.add_argument(
         "--signal-source",
@@ -58,6 +61,10 @@ def build_signal_provider(config: AppConfig, signal_source: str) -> SignalProvid
     return SimulatedSignalProvider(config.signal)
 
 
+def source_label(signal_source: str) -> str:
+    return "ADC" if signal_source == "ads1115" else "SIM"
+
+
 def run(
     config: AppConfig,
     ticks: int | None = None,
@@ -66,7 +73,10 @@ def run(
 ) -> None:
     provider = build_signal_provider(config, signal_source)
     processor = SignalProcessor(config.signal)
-    engine = CreatureStateEngine(config.thresholds)
+    interpreter = DriveInterpreter(config.fusion)
+    session_tracker = SessionTracker(config.fusion)
+    engine = CreatureStateEngine(config.state)
+    presenter = PresentationComposer(UtteranceGenerator())
     output = ConsoleRenderer(bar_width=config.console_bar_width)
     recorder = build_recorder(config, log_file)
 
@@ -77,13 +87,23 @@ def run(
 
     while ticks is None or cycle_count < ticks:
         loop_started = time.monotonic()
+        session = session_tracker.memory
 
         sample = provider.read()
         processed = processor.process(sample)
-        snapshot = engine.evaluate(processed)
-        recorder.record_tick(processed, snapshot)
+        fusion = interpreter.interpret(processed, session)
+        snapshot = engine.evaluate(fusion.drives, session)
+        session = session_tracker.update(fusion.drives, snapshot)
+        presentation = presenter.compose(
+            processed,
+            fusion,
+            snapshot,
+            tick_count=session.tick_count,
+            source_label=source_label(signal_source),
+        )
 
-        output.emit(processed, snapshot)
+        output.emit(presentation)
+        recorder.record_tick(processed, fusion, snapshot, presentation, session)
 
         cycle_count += 1
         elapsed = time.monotonic() - loop_started

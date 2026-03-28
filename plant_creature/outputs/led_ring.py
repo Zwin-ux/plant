@@ -3,16 +3,17 @@ from __future__ import annotations
 from typing import Any
 
 from config import LedRingConfig
+from plant_creature.presentation import CreaturePresentation
 
 from .base import OutputUnavailable
 
 
 class WS2812RingOutput:
     """
-    Placeholder WS2812 ring output surface for the first hardware bring-up pass.
+    Placeholder WS2812 ring output surface for the first creature expression pass.
 
-    The class exposes import and availability checks now, while leaving creature
-    lighting behavior for the first real hardware expression pass.
+    The class now consumes the presentation object and exposes the aura pattern
+    mapping we will eventually send to the ring once the hardware is attached.
     """
 
     def __init__(self, config: LedRingConfig) -> None:
@@ -30,7 +31,7 @@ class WS2812RingOutput:
 
         return (
             True,
-            "WS2812 libraries are available. Lighting behavior is still a placeholder.",
+            "WS2812 libraries are available. Aura behavior is still a hardware-gated scaffold.",
         )
 
     @staticmethod
@@ -47,9 +48,9 @@ class WS2812RingOutput:
 
         return board, neopixel
 
-    def emit(self, signal: object, snapshot: object) -> None:
-        del signal
-        del snapshot
+    def emit(self, presentation: CreaturePresentation) -> None:
+        del presentation
         raise OutputUnavailable(
-            "WS2812 ring output is not wired into behavior yet. This module is a bring-up scaffold."
+            "WS2812 ring output is not wired into live behavior yet. "
+            "Use the presentation aura pattern during tomorrow's hardware pass."
         )

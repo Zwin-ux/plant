@@ -1,32 +1,49 @@
 # Plant Creature Alpha
 
-Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a digital creature that begins in simulation mode and later evolves into a plant biofeedback-driven organism.
+Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a small digital organism that starts in simulation mode and later grows into a plant-linked biofeedback companion.
+
+The current alpha is shaped more like a Tamagotchi crossed with a Pokewalker than a sensor dashboard. Raw inputs are processed into hidden creature drives, then surfaced as short moods, expressions, and tiny bits of language.
 
 ## Current status
-- Raspberry Pi 5 setup in progress
-- SSH working
-- Software scaffold under active development
-- Hardware integration planned after core simulation pipeline is stable
-- Tomorrow's first hardware set includes an ADS1115 ADC, SSD1306 OLED, WS2812 ring, capacitive moisture sensors, breadboards, and jumper wires
+- Raspberry Pi 5 setup is stable enough for software work
+- SSH is working
+- simulation-first runtime is live
+- hardware-aware ADS1115, OLED, and LED boundaries exist
+- tomorrow's first hardware set includes an ADS1115 ADC, SSD1306 OLED, WS2812 ring, capacitive moisture sensors, breadboards, and jumper wires
 
-## Goals
-- simulation-first signal pipeline
-- modular creature state engine
-- swappable real sensor input later
-- local logging and expressive output
+## Creature loop
 
-## What the current scaffold does
+The runtime now follows a five-layer loop:
 
-The current Phase 1 scaffold focuses on a runnable core:
+```text
+input -> processing -> fusion drives -> public state -> presentation -> expression
+```
 
-- a simulated signal source that feels alive instead of purely random
-- a hardware-aware provider boundary for future ADS1115 input
-- a processor that smooths and normalizes the signal
-- a creature state engine with `SLEEPY`, `CALM`, `ACTIVE`, `ALERT`, and `STRESSED`
-- expressive console output
-- opt-in JSONL logging
-- Pi deployment scripts for bootstrap, sync, and smoke tests
-- OLED and LED ring placeholder modules for tomorrow's bring-up pass
+What that means in practice:
+
+- `signals/` reads simulated input now, with ADS1115 support prepared for later
+- `signals/processor.py` smooths and normalizes raw values
+- `fusion/` converts those values into hidden drives:
+  - hydration
+  - stability
+  - energy
+  - bond
+  - stress_load
+- `state/` maps the hidden drives into public creature states:
+  - `SLEEPY`
+  - `CALM`
+  - `ACTIVE`
+  - `ALERT`
+  - `STRESSED`
+  - `RECOVERING`
+- `presentation.py` turns state into creature-readable output data
+- `outputs/` renders that presentation to the console today, with OLED and LED surfaces scaffolded for tomorrow
+
+## Important scope note
+
+This repo does **not** include actual [TRIBE v2](https://github.com/facebookresearch/tribev2) code, weights, or dependencies.
+
+TRIBE is inspiration here, not runtime infrastructure. The current repo uses a lightweight hidden-drive fusion layer that fits a Raspberry Pi 5 and keeps the project simulation-first.
 
 ## Project structure
 
@@ -37,6 +54,7 @@ plant/
   SOURCES.md
   DECISIONS.md
   TODO.md
+  HANDOFF_CHATGPT.md
   requirements.txt
   main.py
   config.py
@@ -44,28 +62,49 @@ plant/
     sync_to_pi.ps1
     run_pi_smoke.ps1
     bootstrap_pi.sh
+    pi_status.ps1
   plant_creature/
     __init__.py
-    signals/
+    fusion/
       __init__.py
-      base.py
-      ads1115.py
-      simulated.py
-      processor.py
-    state/
+      drives.py
+      interpreter.py
+    logging/
       __init__.py
-      engine.py
-      models.py
+      recorder.py
+    memory/
+      __init__.py
+      session.py
     outputs/
       __init__.py
       base.py
       console.py
-      oled.py
       led_ring.py
-    logging/
+      oled.py
+      oled_layouts.py
+      voice.py
+    presentation.py
+    signals/
       __init__.py
-      recorder.py
+      ads1115.py
+      base.py
+      processor.py
+      simulated.py
+    state/
+      __init__.py
+      engine.py
+      models.py
 ```
+
+## What the current scaffold does
+
+- generates a living-feeling simulated signal
+- smooths and normalizes it
+- interprets it through hidden drives instead of direct state thresholds
+- produces short, creature-readable phrases
+- renders a concise console expression once per tick
+- logs signal, drives, state, and presentation data to JSONL when enabled
+- keeps OLED and LED ring code side-by-side as optional hardware scaffolds
 
 ## Run locally
 
@@ -74,13 +113,13 @@ python3 -m pip install -r requirements.txt
 python3 main.py
 ```
 
-Run a short test loop:
+Short simulation run:
 
 ```bash
 python3 main.py --ticks 10
 ```
 
-Run with logging:
+Run with JSONL logging:
 
 ```bash
 python3 main.py --ticks 10 --log-file logs/dev.jsonl
@@ -92,11 +131,11 @@ Probe the future ADS1115 path:
 python3 main.py --ticks 1 --signal-source ads1115
 ```
 
-If the optional hardware libraries or the ADC are not available yet, the command should fail gracefully with a clear message.
+If the optional hardware libraries or the ADC are not available yet, that command should fail gracefully with a clear message.
 
 ## Pi workflow
 
-GitHub is the default source of truth:
+GitHub remains the default source of truth:
 
 ```bash
 ssh pi@192.168.137.142
@@ -118,4 +157,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\pi_status.ps1
 
 ## Advisor handoff
 
-Use `HANDOFF_CHATGPT.md` when you want ChatGPT to stay aligned with the actual machine state, the current repo status, and the hardware arriving next.
+Use `HANDOFF_CHATGPT.md` when you want ChatGPT to stay aligned with the actual machine state, the current repo status, and the hardware arriving tomorrow.
