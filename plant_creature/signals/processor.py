@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 
 from config import SignalConfig
+
+from .base import SignalSample
 
 
 def _clamp(value: float, minimum: float, maximum: float) -> float:
@@ -25,12 +27,12 @@ class SignalProcessor:
         self._config = config
         self._last_smoothed: float | None = None
 
-    def process(self, raw_value: float) -> ProcessedSignal:
+    def process(self, sample: SignalSample) -> ProcessedSignal:
         if self._last_smoothed is None:
-            smoothed = raw_value
+            smoothed = sample.raw_value
         else:
             alpha = self._config.smoothing_factor
-            smoothed = (alpha * raw_value) + ((1.0 - alpha) * self._last_smoothed)
+            smoothed = (alpha * sample.raw_value) + ((1.0 - alpha) * self._last_smoothed)
 
         self._last_smoothed = smoothed
 
@@ -40,8 +42,8 @@ class SignalProcessor:
         normalized = _clamp(normalized, 0.0, 1.0)
 
         return ProcessedSignal(
-            timestamp=datetime.now(timezone.utc),
-            raw_value=raw_value,
+            timestamp=sample.timestamp,
+            raw_value=sample.raw_value,
             smoothed_value=smoothed,
             normalized_value=normalized,
         )

@@ -15,13 +15,23 @@ The codebase is split into:
 
 This keeps hardware adapters swappable later without turning the repo into generic IoT glue code.
 
+## Explicit signal contract
+
+Signal providers share a tiny contract in `plant_creature.signals.base`.
+This keeps the current simulator and future hardware readers on the same pipeline without introducing a heavy abstraction layer.
+
 ## Standard library only for the first commit
 
 The first commit uses no external dependencies. The goal is a clean, inspectable base that runs anywhere Python 3 runs.
 
 ## Main file stays thin
 
-`main.py` only wires together config, signal generation, processing, state mapping, and output.
+`main.py` only wires together config, signal generation, processing, state mapping, logging, and output.
+
+## Git-first Pi workflow
+
+GitHub is the canonical source of truth.
+Deployment defaults to pull-based updates on the Pi, with a separate fast-sync script for local iteration before a push.
 
 ## Current creature states are product states
 

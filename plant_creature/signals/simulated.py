@@ -6,12 +6,14 @@ import time
 
 from config import SignalConfig
 
+from .base import SignalProvider, SignalSample
+
 
 def _clamp(value: float, minimum: float, maximum: float) -> float:
     return max(minimum, min(value, maximum))
 
 
-class SimulatedSignalProvider:
+class SimulatedSignalProvider(SignalProvider):
     """
     Generate a soft, living-feeling signal for development before hardware arrives.
 
@@ -21,8 +23,8 @@ class SimulatedSignalProvider:
     - random drift
     - occasional surges
 
-    Future real hardware providers should expose the same narrow contract:
-    `read() -> float`
+    Future real hardware providers should expose the same contract:
+    `read() -> SignalSample`
     """
 
     def __init__(self, config: SignalConfig, seed: int | None = None) -> None:
@@ -34,7 +36,7 @@ class SimulatedSignalProvider:
         self._surge = 0.0
         self._last_tick = time.monotonic()
 
-    def read(self) -> float:
+    def read(self) -> SignalSample:
         now = time.monotonic()
         dt = max(now - self._last_tick, 0.001)
         self._last_tick = now
@@ -71,4 +73,6 @@ class SimulatedSignalProvider:
             + self._surge
             + micro_noise
         )
-        return _clamp(raw_value, self._config.min_value, self._config.max_value)
+        return SignalSample.now(
+            raw_value=_clamp(raw_value, self._config.min_value, self._config.max_value)
+        )

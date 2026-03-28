@@ -1,3 +1,3 @@
-from .recorder import JsonlRecorder, LogEvent
+from .recorder import JsonlRecorder, LogEvent, NullRecorder
 
-__all__ = ["JsonlRecorder", "LogEvent"]
+__all__ = ["JsonlRecorder", "LogEvent", "NullRecorder"]

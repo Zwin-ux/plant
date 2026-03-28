@@ -23,9 +23,16 @@ class StateThresholds:
 
 
 @dataclass(frozen=True)
+class LoggingConfig:
+    enabled_by_default: bool = False
+    default_path: str = "logs/plant_creature.jsonl"
+
+
+@dataclass(frozen=True)
 class AppConfig:
     signal: SignalConfig = field(default_factory=SignalConfig)
     thresholds: StateThresholds = field(default_factory=StateThresholds)
+    logging: LoggingConfig = field(default_factory=LoggingConfig)
     console_bar_width: int = 24
 
 

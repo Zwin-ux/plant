@@ -7,6 +7,7 @@ Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a digital 
 - SSH working
 - Software scaffold under active development
 - Hardware integration planned after core simulation pipeline is stable
+- Tomorrow's first hardware set includes an ADS1115 ADC, SSD1306 OLED, WS2812 ring, capacitive moisture sensors, breadboards, and jumper wires
 
 ## Goals
 - simulation-first signal pipeline
@@ -16,13 +17,14 @@ Plant Creature Alpha is a Raspberry Pi-based living-system prototype: a digital 
 
 ## What the current scaffold does
 
-The first clean commit focuses on a runnable core:
+The current Phase 1 scaffold focuses on a runnable core:
 
 - a simulated signal source that feels alive instead of purely random
 - a processor that smooths and normalizes the signal
 - a creature state engine with `SLEEPY`, `CALM`, `ACTIVE`, `ALERT`, and `STRESSED`
 - expressive console output
-- a logging module ready for the next pass
+- opt-in JSONL logging
+- Pi deployment scripts for bootstrap, sync, and smoke tests
 
 ## Project structure
 
@@ -36,10 +38,15 @@ plant/
   requirements.txt
   main.py
   config.py
+  scripts/
+    sync_to_pi.ps1
+    run_pi_smoke.ps1
+    bootstrap_pi.sh
   plant_creature/
     __init__.py
     signals/
       __init__.py
+      base.py
       simulated.py
       processor.py
     state/
@@ -54,7 +61,7 @@ plant/
       recorder.py
 ```
 
-## Run
+## Run locally
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -65,4 +72,30 @@ Run a short test loop:
 
 ```bash
 python3 main.py --ticks 10
+```
+
+Run with logging:
+
+```bash
+python3 main.py --ticks 10 --log-file logs/dev.jsonl
+```
+
+## Pi workflow
+
+GitHub is the default source of truth:
+
+```bash
+ssh pi@192.168.137.142
+cd /home/pi/plant
+git pull --ff-only
+bash scripts/bootstrap_pi.sh
+source .venv/bin/activate
+python main.py --ticks 10
+```
+
+For fast local iteration from Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\sync_to_pi.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\run_pi_smoke.ps1 -SkipPull
 ```
