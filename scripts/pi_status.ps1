@@ -1,5 +1,5 @@
 param(
-    [string]$Host = "pi@192.168.137.142",
+    [string]$SshHost = "pi@192.168.137.142",
     [string]$RemotePath = "/home/pi/plant"
 )
 
@@ -24,4 +24,4 @@ printf 'gpiochip='; ls /dev/gpiochip* 2>/dev/null | tr '\n' ' ' || true; echo
 printf 'logs='; ls '$RemotePath/logs' 2>/dev/null | tr '\n' ' ' || true; echo
 "@
 
-$remoteScript | ssh $Host "bash -s"
+$remoteScript | ssh $SshHost "bash -s"
