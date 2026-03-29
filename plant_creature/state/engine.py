@@ -7,8 +7,12 @@ from plant_creature.memory.session import SessionMemory
 from .models import CreatureSnapshot, CreatureState
 
 
+def _clamp(value: float, minimum: float = 0.0, maximum: float = 1.0) -> float:
+    return max(minimum, min(value, maximum))
+
+
 class CreatureStateEngine:
-    """Map hidden drives into public creature mood states with a little dwell."""
+    """Map hidden drives into plant-creature states that are legible at a glance."""
 
     def __init__(self, config: StateConfig) -> None:
         self._config = config
@@ -30,6 +34,7 @@ class CreatureStateEngine:
             self._state_entry_hydration = drives.hydration
             return CreatureSnapshot(
                 state=self._current_state,
+                intensity=self._intensity_for(candidate, drives),
                 previous_state=None,
                 is_transition=False,
             )
@@ -51,6 +56,7 @@ class CreatureStateEngine:
 
         return CreatureSnapshot(
             state=self._current_state,
+            intensity=self._intensity_for(self._current_state, drives),
             previous_state=previous_state,
             is_transition=is_transition,
         )
@@ -67,34 +73,42 @@ class CreatureStateEngine:
             else self._state_entry_hydration
         )
 
-        if drives.stress_load >= 0.78 or (
-            drives.hydration <= 0.22 and drives.stability <= 0.35
+        if (
+            drives.hydration >= self._config.overload_hydration_ceiling
+            or (
+                drives.stress_load >= self._config.overload_stress_ceiling
+                and drives.stability <= 0.5
+            )
         ):
-            return CreatureState.STRESSED
+            return CreatureState.OVERLOADED
 
         if (
-            previous_state in {CreatureState.STRESSED, CreatureState.ALERT}
-            and drives.stress_load <= 0.58
-            and drives.hydration >= previous_hydration + 0.04
-            and session.recent_peak_stress >= 0.72
+            drives.hydration <= self._config.thirsty_hydration_floor
+            or (
+                drives.stress_load >= 0.68
+                and drives.hydration < 0.45
+            )
+        ):
+            return CreatureState.THIRSTY
+
+        if (
+            previous_state in {
+                CreatureState.THIRSTY,
+                CreatureState.ALERT,
+                CreatureState.OVERLOADED,
+            }
+            and drives.hydration
+            >= previous_hydration + self._config.recovering_hydration_lift
+            and drives.stress_load <= self._config.recovering_stress_ceiling
+            and session.recent_peak_stress >= self._config.recovery_peak_floor
         ):
             return CreatureState.RECOVERING
 
-        if drives.energy <= 0.28 and drives.stress_load < 0.65:
-            return CreatureState.SLEEPY
-
-        if drives.stability <= 0.35 or (
-            drives.stress_load >= 0.55 and drives.energy >= 0.45
+        if (
+            drives.stability <= self._config.alert_stability_floor
+            or drives.stress_load >= self._config.stress_warning_floor
         ):
             return CreatureState.ALERT
-
-        if (
-            drives.hydration >= 0.55
-            and drives.stability >= 0.55
-            and drives.energy >= 0.52
-            and drives.stress_load < 0.45
-        ):
-            return CreatureState.ACTIVE
 
         return CreatureState.CALM
 
@@ -107,7 +121,23 @@ class CreatureStateEngine:
         if self._current_state is CreatureState.RECOVERING:
             return ticks_in_state >= self._config.recovering_min_ticks
 
-        if candidate is CreatureState.STRESSED and drives.stress_load >= 0.85:
+        if candidate is CreatureState.OVERLOADED and (
+            drives.hydration >= 0.92 or drives.stress_load >= 0.88
+        ):
             return True
 
         return ticks_in_state >= self._config.min_dwell_ticks
+
+    @staticmethod
+    def _intensity_for(state: CreatureState, drives: CreatureDrives) -> float:
+        if state is CreatureState.CALM:
+            return _clamp(
+                ((drives.hydration + drives.stability + (1.0 - drives.stress_load)) / 3.0)
+            )
+        if state is CreatureState.THIRSTY:
+            return _clamp(max(1.0 - drives.hydration, drives.stress_load))
+        if state is CreatureState.RECOVERING:
+            return _clamp(max(drives.hydration, 1.0 - drives.stress_load))
+        if state is CreatureState.ALERT:
+            return _clamp(max(1.0 - drives.stability, drives.stress_load))
+        return _clamp(max(drives.hydration, drives.stress_load))

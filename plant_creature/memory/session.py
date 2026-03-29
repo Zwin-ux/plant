@@ -39,7 +39,8 @@ class SessionTracker:
         )
         stress_streak_ticks = (
             self._memory.stress_streak_ticks + 1
-            if snapshot.state is CreatureState.STRESSED or drives.stress_load >= 0.55
+            if snapshot.state in {CreatureState.THIRSTY, CreatureState.ALERT, CreatureState.OVERLOADED}
+            or drives.stress_load >= 0.55
             else 0
         )
         recent_peak_stress = max(

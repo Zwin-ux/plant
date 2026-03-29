@@ -15,9 +15,15 @@ class SignalConfig:
 
 
 @dataclass(frozen=True)
+class SimulationConfig:
+    profile: str = "healthy"
+    seed: int | None = None
+
+
+@dataclass(frozen=True)
 class FusionConfig:
     drive_smoothing_alpha: float = 0.18
-    stability_window: float = 0.18
+    stability_window: float = 0.12
     stable_streak_goal_ticks: int = 300
     stable_threshold: float = 0.6
     stress_peak_decay: float = 0.96
@@ -25,8 +31,16 @@ class FusionConfig:
 
 @dataclass(frozen=True)
 class StateConfig:
-    min_dwell_ticks: int = 5
+    min_dwell_ticks: int = 4
     recovering_min_ticks: int = 3
+    thirsty_hydration_floor: float = 0.28
+    alert_stability_floor: float = 0.55
+    overload_hydration_ceiling: float = 0.78
+    overload_stress_ceiling: float = 0.82
+    stress_warning_floor: float = 0.48
+    recovering_hydration_lift: float = 0.05
+    recovering_stress_ceiling: float = 0.55
+    recovery_peak_floor: float = 0.45
 
 
 @dataclass(frozen=True)
@@ -61,7 +75,9 @@ class LedRingConfig:
 
 @dataclass(frozen=True)
 class AppConfig:
+    input_mode: str = "simulated"
     signal: SignalConfig = field(default_factory=SignalConfig)
+    simulation: SimulationConfig = field(default_factory=SimulationConfig)
     fusion: FusionConfig = field(default_factory=FusionConfig)
     state: StateConfig = field(default_factory=StateConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)

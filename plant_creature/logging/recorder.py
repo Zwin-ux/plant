@@ -42,6 +42,9 @@ class JsonlRecorder:
             handle.write(json.dumps(asdict(event)))
             handle.write("\n")
 
+    def record_runtime_event(self, kind: str, payload: dict[str, Any]) -> None:
+        self.record(kind=kind, payload=payload)
+
     def record_tick(
         self,
         signal: ProcessedSignal,
@@ -64,12 +67,15 @@ class JsonlRecorder:
             "transition": snapshot.is_transition,
             "presentation": {
                 "status_word": presentation.status_word,
+                "intensity": round(presentation.intensity, 4),
                 "face_id": presentation.face_id,
                 "utterance": presentation.utterance,
                 "signal_bar": presentation.signal_bar,
                 "trend": presentation.trend,
                 "transition_flash": presentation.transition_flash,
                 "aura_pattern": presentation.aura_pattern.value,
+                "color_intent": presentation.color_intent,
+                "animation_intent": presentation.animation_intent,
                 "source_label": presentation.source_label,
             },
             "session": {
@@ -100,6 +106,10 @@ class JsonlRecorder:
 
 class NullRecorder:
     """No-op recorder used when logging is disabled."""
+
+    def record_runtime_event(self, kind: str, payload: dict[str, Any]) -> None:
+        del kind
+        del payload
 
     def record_tick(
         self,

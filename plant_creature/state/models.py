@@ -5,16 +5,16 @@ from enum import Enum
 
 
 class CreatureState(str, Enum):
-    SLEEPY = "SLEEPY"
     CALM = "CALM"
-    ACTIVE = "ACTIVE"
-    ALERT = "ALERT"
-    STRESSED = "STRESSED"
+    THIRSTY = "THIRSTY"
     RECOVERING = "RECOVERING"
+    ALERT = "ALERT"
+    OVERLOADED = "OVERLOADED"
 
 
 @dataclass(frozen=True)
 class CreatureSnapshot:
     state: CreatureState
+    intensity: float
     previous_state: CreatureState | None
     is_transition: bool = False

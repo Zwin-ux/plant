@@ -6,6 +6,7 @@ __all__ = [
     "memory",
     "outputs",
     "presentation",
+    "services",
     "signals",
     "state",
 ]
