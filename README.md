@@ -2,9 +2,9 @@
 
 Core Cube is a Raspberry Pi-based signal creature: a small living-feeling system that turns input signals into mood, language, and future physical expression.
 
-Tonight's goal is software confidence, not breadboard heroics. The runtime must work cleanly with zero hardware attached, then swap to ADS1115 input tomorrow without changing the engine.
+The runtime is designed to work cleanly with zero hardware attached. Swapping in real hardware (e.g. the ADS1115) requires no changes to the engine.
 
-## Current architecture
+## Architecture
 
 The live pipeline is:
 
@@ -25,8 +25,8 @@ The current repo keeps that split like this:
 - `plant_creature/presentation.py`
   - output-facing presentation model
 - `plant_creature/outputs/`
-  - console output today
-  - OLED / LED ring placeholders for tomorrow
+  - console output
+  - OLED / LED ring placeholders
 - `plant_creature/services/runtime.py`
   - runtime orchestration
 - `plant_creature/logging/`
@@ -51,13 +51,13 @@ Each tick produces a presentation object with:
 - animation intent
 - trend
 
-That keeps tomorrow's OLED and LED ring work decoupled from engine internals.
+That keeps OLED and LED ring work decoupled from engine internals.
 
 ## Simulation mode
 
 Simulation is the default and requires no hardware libraries.
 
-Profiles available tonight:
+Available profiles:
 
 - `healthy`
 - `dry`
@@ -65,7 +65,7 @@ Profiles available tonight:
 - `unstable`
 - `overloaded`
 
-These are meant to rehearse tomorrow's hardware scenarios in the terminal before anything touches the breadboard.
+These profiles let you rehearse hardware scenarios in the terminal before connecting any hardware.
 
 ## Run in the Pi venv
 
@@ -86,33 +86,25 @@ python main.py --ticks 8 --simulation-profile overloaded
 python main.py --ticks 10 --log-file logs/dev.jsonl
 ```
 
-Deterministic simulation if you want a repeatable rehearsal:
+Deterministic simulation for a repeatable run:
 
 ```bash
 python main.py --ticks 12 --simulation-profile dry --simulation-seed 7
 ```
 
-## Tomorrow's ADS1115 path
+## ADS1115 hardware path
 
-The real soil moisture path is prepared but still optional.
+The real soil moisture path is prepared but optional.
 
-Current command:
+To use it:
 
 ```bash
 python main.py --ticks 1 --signal-source ads1115
 ```
 
-Right now that should fail gracefully if the hardware libraries or I2C device are missing.
+If the hardware libraries or I2C device are missing, this fails gracefully.
 
-Tomorrow's flow:
-
-```bash
-cd ~/plant
-source .venv/bin/activate
-python main.py --ticks 1 --signal-source ads1115
-```
-
-If the ADS1115 stack is not installed yet, install it inside the venv:
+To install the ADS1115 library inside the venv:
 
 ```bash
 pip install adafruit-circuitpython-ads1x15
@@ -124,7 +116,7 @@ Then verify the bus on the Pi:
 i2cdetect -y 1
 ```
 
-Expected first target:
+Target hardware setup:
 
 - ADS1115 on I2C
 - one soil moisture sensor on A0
@@ -132,7 +124,7 @@ Expected first target:
 
 ## Logging
 
-JSONL logs now capture:
+JSONL logs capture:
 
 - runtime startup / shutdown
 - raw and normalized values
@@ -142,7 +134,7 @@ JSONL logs now capture:
 - presentation intent
 - source mode
 
-That should make tomorrow's first hardware readings much easier to debug.
+This makes hardware readings much easier to debug when switching from simulation to real sensor input.
 
 ## Important scope note
 
